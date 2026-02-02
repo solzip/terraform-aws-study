@@ -1,0 +1,216 @@
+# Terraform 실행 시 생성되는 로컬 파일들
+# 이 파일들은 민감한 정보를 포함하거나 자동 생성되므로 Git에 올리지 않습니다
+
+# =======================================
+# Terraform State Files
+# =======================================
+# Terraform 상태 파일 - 인프라의 현재 상태를 저장 (민감 정보 포함 가능)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# 상태 파일 백업
+terraform.tfstate.lock.info
+
+# =======================================
+# Terraform Variables
+# =======================================
+# Terraform 변수 파일 - AWS 키 등 민감한 정보 포함
+terraform.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
+
+# 변수 파일 백업
+*.tfvars.backup
+
+# =======================================
+# Terraform Plugins & Cache
+# =======================================
+# Terraform 플러그인 디렉토리 - provider 다운로드 위치
+.terraform/
+.terraform.lock.hcl
+
+# =======================================
+# Override Files
+# =======================================
+# Override 파일 - 로컬 테스트용 임시 파일
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# =======================================
+# Crash Logs
+# =======================================
+# Terraform crash 로그
+crash.log
+crash.*.log
+
+# =======================================
+# Secrets & Certificates
+# =======================================
+# 인증서 및 키 파일
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# AWS 자격증명
+.aws/
+credentials
+config
+
+# SSH 키
+id_rsa
+id_rsa.pub
+*.ppk
+
+# Secrets
+secrets/
+*.secret
+.env
+.env.*
+
+# =======================================
+# IDE & Editor
+# =======================================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# =======================================
+# OS Files
+# =======================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# =======================================
+# Logs
+# =======================================
+*.log
+logs/
+*.log.*
+
+# =======================================
+# Temporary Files
+# =======================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# =======================================
+# Test Files
+# =======================================
+# Terraform testing
+.test/
+test-results/
+*.tftest
+
+# =======================================
+# Documentation Build
+# =======================================
+# Generated documentation
+.terraform-docs/
+docs/_build/
+
+# =======================================
+# CI/CD
+# =======================================
+# GitHub Actions artifacts (로컬 테스트)
+.github/workflows/test-results/
+
+# =======================================
+# LocalStack (02-basic-localstack)
+# =======================================
+# LocalStack 데이터
+localstack-data/
+.localstack/
+volume/
+
+# Docker
+docker-compose.override.yml
+
+# =======================================
+# Backend State Files
+# =======================================
+# Local backend files
+.terraform.tfstate.lock.info
+
+# =======================================
+# Module Cache
+# =======================================
+.terraform-cache/
+
+# =======================================
+# Planning Files
+# =======================================
+# Terraform plan 파일 (민감 정보 포함 가능)
+*.tfplan
+tfplan
+plan.out
+
+# =======================================
+# Custom Exclusions
+# =======================================
+# 프로젝트별 커스텀 제외 파일
+# 필요시 여기에 추가
+
+# =======================================
+# IMPORTANT: Always Include
+# =======================================
+# 다음 파일들은 반드시 Git에 포함되어야 합니다:
+# - *.tf (Terraform 코드)
+# - *.tf.example (예시 파일)
+# - terraform.tfvars.example (변수 예시)
+# - README.md (문서)
+# - .gitignore (현재 파일)
+
+# =======================================
+# Security Note
+# =======================================
+# 민감한 정보가 포함된 파일을 실수로 커밋했다면:
+# 1. git filter-branch 또는 BFG Repo-Cleaner 사용
+# 2. 노출된 자격증명은 즉시 재발급
+# 3. GitHub Secret Scanning 활성화 권장
