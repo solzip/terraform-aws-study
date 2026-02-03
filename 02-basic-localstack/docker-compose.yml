@@ -1,0 +1,113 @@
+# LocalStack Docker Compose 설정
+# LocalStack은 AWS 클라우드 서비스를 로컬에서 에뮬레이션하는 도구입니다
+
+version: '3.8'
+
+services:
+  localstack:
+    # LocalStack 공식 이미지 (최신 버전)
+    image: localstack/localstack:latest
+
+    container_name: terraform-localstack
+
+    # 포트 매핑
+    ports:
+      - "4566:4566"   # LocalStack Gateway (모든 AWS 서비스 통합 엔드포인트)
+      - "4510-4559:4510-4559"  # 외부 서비스 포트 범위 (필요시)
+
+    # 환경 변수 설정
+    environment:
+      # 활성화할 AWS 서비스 목록
+      # 필요한 서비스만 활성화하여 리소스 절약
+      - SERVICES=ec2,s3,dynamodb,iam,sts,cloudformation,cloudwatch,logs,sns,sqs
+
+      # 디버그 모드 활성화 (개발 중 유용)
+      - DEBUG=1
+
+      # 데이터 저장 디렉토리
+      - DATA_DIR=/tmp/localstack/data
+
+      # Docker 호스트 (Docker-in-Docker 사용 시)
+      - DOCKER_HOST=unix:///var/run/docker.sock
+
+      # Lambda 실행 환경 (Docker 재사용)
+      - LAMBDA_EXECUTOR=docker-reuse
+
+      # 호스트 이름 설정
+      - HOSTNAME=localhost
+      - HOSTNAME_EXTERNAL=localhost
+
+      # 엣지 포트 (모든 서비스가 4566으로 통합됨)
+      - EDGE_PORT=4566
+
+      # 영구 저장 활성화
+      - PERSISTENCE=1
+
+      # 기본 리전 설정
+      - DEFAULT_REGION=ap-northeast-2
+
+    # 볼륨 마운트
+    volumes:
+      # LocalStack 데이터 영구 저장 (재시작해도 데이터 유지)
+      - "./localstack/data:/tmp/localstack"
+
+      # Docker 소켓 마운트 (Lambda 등에서 필요)
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+      # 초기화 스크립트 마운트
+      # LocalStack 시작 시 자동 실행되는 스크립트
+      - "./localstack/init-scripts:/etc/localstack/init/ready.d"
+
+    # 네트워크 설정
+    networks:
+      - localstack-network
+
+    # 헬스체크 설정
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+    # 컨테이너 재시작 정책
+    restart: unless-stopped
+
+# 네트워크 정의
+networks:
+  localstack-network:
+    driver: bridge
+
+# 볼륨 정의 (선택사항)
+# volumes:
+#   localstack-data:
+
+# ==========================================
+# 사용 방법
+# ==========================================
+#
+# 1. LocalStack 시작:
+#    $ docker-compose up -d
+#
+# 2. LocalStack 상태 확인:
+#    $ docker-compose ps
+#    $ docker-compose logs -f
+#
+# 3. LocalStack 헬스체크:
+#    $ curl http://localhost:4566/_localstack/health
+#
+# 4. LocalStack 중지:
+#    $ docker-compose down
+#
+# 5. 데이터 포함 완전 삭제:
+#    $ docker-compose down -v
+#    $ rm -rf localstack/data
+#
+# ==========================================
+# 주의사항
+# ==========================================
+#
+# - LocalStack은 AWS 서비스를 완벽하게 구현하지 않습니다
+# - 일부 기능은 Pro 버전에서만 사용 가능합니다
+# - 프로덕션 환경에서는 절대 사용하지 마세요
+# - 개발 및 테스트 목적으로만 사용하세요
