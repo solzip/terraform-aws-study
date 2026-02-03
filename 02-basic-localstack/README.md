@@ -56,6 +56,9 @@ AWS 비용 걱정 없이 로컬 환경에서 Terraform을 실습합니다.
 02-basic-localstack/
 ├── README.md
 ├── docker-compose.yml          # LocalStack 설정
+├── Makefile                    # 편의 명령어 (make start, apply 등)
+├── switch-to-localstack.sh     # LocalStack 전환 스크립트 
+├── switch-to-aws.sh            # AWS 전환 스크립트 
 ├── localstack/
 │   ├── init-scripts/           # 초기화 스크립트
 │   │   └── init.sh
@@ -63,10 +66,16 @@ AWS 비용 걱정 없이 로컬 환경에서 Terraform을 실습합니다.
 ├── main.tf                     # 리소스 정의 (01-basic과 동일)
 ├── variables.tf
 ├── outputs.tf
-├── providers-localstack.tf     # LocalStack용 Provider
-├── providers-aws.tf            # AWS 실제 환경용 (참고)
-├── Makefile                    # 편의 명령어
-└── .env.example                # 환경 변수 예시
+├── versions.tf
+├── providers-localstack.tf     # LocalStack용 Provider (기본 활성화)
+├── providers-aws.tf            # AWS 실제 환경용 (참고용) 
+├── terraform.tfvars.example
+├── .gitignore
+├── .env.example                # 환경 변수 예시
+└── docs/
+    ├── 01-localstack-setup.md
+    ├── 02-docker-guide.md
+    └── 03-troubleshooting.md
 ```
 
 ## 🚀 실습 시작하기
@@ -217,7 +226,26 @@ terraform apply -var-file=prod.tfvars
 
 ### 3. Makefile로 편리하게 사용
 
-**Makefile**:
+**주요 명령어**:
+```bash
+make help       # 사용 가능한 모든 명령어 보기
+make start      # LocalStack 시작
+make stop       # LocalStack 중지
+make restart    # LocalStack 재시작
+make logs       # 로그 실시간 확인
+make health     # 상태 확인
+
+make init       # Terraform 초기화 (LocalStack 자동 시작)
+make plan       # 실행 계획 확인
+make apply      # 리소스 생성
+make destroy    # 리소스 삭제
+
+make check      # 생성된 리소스 확인
+make clean      # 모든 리소스 정리 (Terraform + LocalStack)
+make test       # 전체 자동 테스트 (시작→배포→확인→삭제)
+```
+
+**Makefile 예시**:
 ```makefile
 .PHONY: start stop init plan apply destroy clean
 
@@ -234,10 +262,6 @@ stop:
 # Terraform 초기화
 init: start
 	terraform init
-
-# Terraform Plan
-plan: init
-	terraform plan
 
 # Terraform Apply
 apply: init
@@ -265,10 +289,11 @@ test: clean apply
 make test
 
 # 단계별 실행
-make start   # LocalStack 시작
-make apply   # 리소스 생성
-make destroy # 리소스 삭제
-make clean   # 완전 정리
+make start      # LocalStack 시작
+make apply      # 리소스 생성
+make check      # 리소스 확인
+make destroy    # 리소스 삭제
+make clean      # 완전 정리
 ```
 
 ## 🔍 LocalStack 명령어
@@ -314,6 +339,75 @@ alias awslocal='aws --endpoint-url=http://localhost:4566'
 # 사용
 awslocal ec2 describe-vpcs
 awslocal s3 ls
+```
+
+## 🔄 LocalStack ↔ AWS 전환
+
+### 방법 1: 스크립트 사용 (가장 쉬움) ⭐
+
+```bash
+# LocalStack으로 전환
+./switch-to-localstack.sh
+
+# 실제 AWS로 전환
+./switch-to-aws.sh
+```
+
+### 방법 2: 수동 전환
+
+```bash
+# LocalStack → AWS
+mv providers-localstack.tf providers-localstack.tf.bak
+mv providers-aws.tf providers.tf
+# providers.tf 파일을 열어서 주석 해제
+terraform init -reconfigure
+
+# AWS → LocalStack
+mv providers.tf providers-aws.tf
+mv providers-localstack.tf.bak providers-localstack.tf
+terraform init -reconfigure
+```
+
+### 전환 후 확인
+
+```bash
+# Provider 확인
+terraform providers
+
+# 실제 AWS 사용 시
+terraform plan  # AWS 자격증명 필요
+terraform apply  # ⚠️ 비용 발생 가능!
+
+# LocalStack 사용 시
+make start  # LocalStack 먼저 시작
+terraform plan  # 무료
+terraform apply  # 무료
+```
+
+### ⚠️ 실제 AWS 사용 시 주의사항
+
+1. **비용 발생**: EC2 인스턴스가 실제로 실행되어 비용 발생
+2. **프리티어**: t2.micro는 750시간/월 무료
+3. **즉시 정리**: 실습 후 반드시 `terraform destroy`
+4. **자격증명**: `aws configure`로 AWS 자격증명 설정 필요
+
+### 💡 추천 학습 흐름
+
+```
+1단계: LocalStack으로 연습
+   ├─ providers-localstack.tf 사용
+   ├─ 비용 없이 무제한 실습
+   └─ 코드 작성 및 테스트
+
+2단계: 코드 검증
+   ├─ ./switch-to-aws.sh 실행
+   ├─ providers.tf 주석 해제
+   ├─ terraform plan 확인
+   └─ (선택) terraform apply로 실제 배포
+
+3단계: 즉시 정리
+   └─ terraform destroy
+   └─ ./switch-to-localstack.sh로 복귀
 ```
 
 ## 🐛 트러블슈팅
@@ -366,12 +460,18 @@ curl http://localhost:4566/_localstack/health
 
 ## ✅ 학습 체크리스트
 
+### 기본 실습
 - [ ] Docker Compose로 LocalStack 실행
 - [ ] Terraform Provider를 LocalStack 엔드포인트로 설정
 - [ ] 로컬에서 VPC, EC2 등 리소스 생성
 - [ ] AWS CLI로 LocalStack 리소스 확인
 - [ ] Makefile로 자동화 경험
+
+### 고급 학습
 - [ ] LocalStack과 실제 AWS의 차이 이해
+- [ ] 전환 스크립트 사용 경험
+- [ ] providers-aws.tf 파일 이해
+- [ ] 실제 AWS로 전환 테스트 (선택사항)
 - [ ] CI/CD 파이프라인에서 활용 방법 이해
 
 ## 🔄 다음 단계
