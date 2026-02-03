@@ -120,7 +120,7 @@ enable_monitoring = true
 variable "environment" {
   description = "환경 이름"
   type        = string
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "유효한 환경: dev, staging, prod"
@@ -133,7 +133,7 @@ variable "instance_config" {
     instance_type  = string
     instance_count = number
   }))
-  
+
   default = {
     dev = {
       instance_type  = "t2.micro"
