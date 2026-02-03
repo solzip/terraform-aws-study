@@ -1,0 +1,11 @@
+# LocalStack 환경 변수 예시
+
+aws_region         = "ap-northeast-2"
+environment        = "localstack"
+project_name       = "terraform-localstack-test"
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+instance_type      = "t2.micro"
+
+# LocalStack은 실제 AWS가 아니므로
+# 어떤 값을 넣어도 비용이 발생하지 않습니다!
