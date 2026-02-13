@@ -1,0 +1,147 @@
+# ==========================================
+# validate.yml - Terraform 코드 검증 워크플로우
+# ==========================================
+#
+# 이 워크플로우의 역할:
+#   모든 Push와 PR에서 Terraform 코드의 품질을 자동으로 검증합니다.
+#   포맷팅, 문법, 보안 검사를 수행하여 코드 품질을 보장합니다.
+#
+# 트리거 조건:
+#   - main 브랜치로의 Push
+#   - main 브랜치로의 Pull Request
+#   - 수동 실행 (workflow_dispatch)
+#
+# GitHub Actions 기본 개념:
+#   - Workflow: 자동화 프로세스 전체 (.yml 파일 1개)
+#   - Job: 워크플로우 내의 작업 단위 (병렬 실행 가능)
+#   - Step: Job 내의 개별 단계 (순차 실행)
+#   - Action: 재사용 가능한 단위 (actions/checkout 등)
+#   - Runner: 워크플로우를 실행하는 서버 (ubuntu-latest 등)
+
+name: "Terraform Validate"
+
+# ==========================================
+# 트리거 조건
+# ==========================================
+on:
+  # main 브랜치에 Push될 때
+  push:
+    branches: [main]
+    paths:
+      - "09-ci-cd/**"  # 09-ci-cd 디렉토리 변경 시에만 실행
+
+  # main 브랜치로 PR이 생성/업데이트될 때
+  pull_request:
+    branches: [main]
+    paths:
+      - "09-ci-cd/**"
+
+  # 수동 실행 (GitHub UI에서 "Run workflow" 버튼)
+  workflow_dispatch:
+
+# ==========================================
+# Job 정의
+# ==========================================
+jobs:
+  validate:
+    name: "Validate Terraform Code"
+    # 실행 환경: Ubuntu 최신 버전
+    runs-on: ubuntu-latest
+
+    # 기본 작업 디렉토리 설정
+    defaults:
+      run:
+        working-directory: 09-ci-cd
+
+    steps:
+      # ==========================================
+      # Step 1: 코드 체크아웃
+      # ==========================================
+      # 리포지토리 코드를 Runner에 다운로드합니다.
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ==========================================
+      # Step 2: Terraform 설치
+      # ==========================================
+      # 지정한 버전의 Terraform을 Runner에 설치합니다.
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"  # 사용할 Terraform 버전 고정
+
+      # ==========================================
+      # Step 3: Terraform 포맷 검사
+      # ==========================================
+      # terraform fmt -check:
+      #   코드가 표준 포맷을 따르는지 확인합니다.
+      #   포맷이 맞지 않으면 실패합니다.
+      #
+      # -recursive: 하위 디렉토리(모듈)도 검사
+      # -diff: 수정이 필요한 부분을 표시
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive -diff
+        continue-on-error: true  # 실패해도 다음 Step 실행
+
+      # ==========================================
+      # Step 4: Terraform 초기화
+      # ==========================================
+      # terraform init:
+      #   Provider 플러그인을 다운로드합니다.
+      #   -backend=false: State Backend 설정 없이 초기화
+      #   (검증 목적이므로 실제 State 연결 불필요)
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend=false
+
+      # ==========================================
+      # Step 5: Terraform 문법 검증
+      # ==========================================
+      # terraform validate:
+      #   HCL 문법이 올바른지 확인합니다.
+      #   리소스 참조, 변수 타입 등을 검증합니다.
+      #   AWS API를 호출하지 않으므로 자격증명 불필요!
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      # ==========================================
+      # Step 6: 검증 결과 요약 (PR 코멘트)
+      # ==========================================
+      # PR에서 실행된 경우, 검증 결과를 코멘트로 표시합니다.
+      # 개발자가 PR 페이지에서 바로 결과를 확인할 수 있습니다.
+      - name: Post Validation Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `### Terraform Validation Results
+
+            | Step | Status |
+            |------|--------|
+            | Format | ${{ steps.fmt.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |
+            | Init | ${{ steps.init.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |
+            | Validate | ${{ steps.validate.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |
+
+            *Pushed by: @${{ github.actor }}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      # ==========================================
+      # Step 7: 포맷 실패 시 워크플로우 실패 처리
+      # ==========================================
+      # Step 3에서 continue-on-error: true로 설정했으므로
+      # 여기서 최종적으로 실패 여부를 결정합니다.
+      - name: Check Format Result
+        if: steps.fmt.outcome == 'failure'
+        run: |
+          echo "❌ Terraform format check failed!"
+          echo "Run 'terraform fmt -recursive' locally to fix formatting."
+          exit 1

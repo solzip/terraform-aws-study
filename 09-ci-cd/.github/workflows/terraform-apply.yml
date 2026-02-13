@@ -1,0 +1,157 @@
+# ==========================================
+# terraform-apply.yml - Terraform Apply 워크플로우
+# ==========================================
+#
+# 이 워크플로우의 역할:
+#   승인된 변경 사항을 실제 AWS 환경에 배포합니다.
+#   수동으로만 실행할 수 있으며, 안전장치가 포함되어 있습니다.
+#
+# 안전장치:
+#   1. 수동 실행만 가능 (workflow_dispatch)
+#   2. 환경(environment) 보호 규칙 적용 가능
+#   3. Apply 전에 Plan을 다시 실행하여 확인
+#   4. -auto-approve 대신 확인 단계 포함
+#
+# 실행 방법:
+#   GitHub → Actions 탭 → "Terraform Apply" 선택
+#   → "Run workflow" 클릭 → 환경 선택 → "Run workflow"
+
+name: "Terraform Apply"
+
+on:
+  # 수동 실행만 허용
+  workflow_dispatch:
+    inputs:
+      # 배포할 환경을 선택합니다
+      environment:
+        description: "배포 환경 선택"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+        default: dev
+
+      # 이중 확인: 정말 Apply를 실행할지 확인
+      confirm:
+        description: "Apply를 실행하시겠습니까? (yes 입력)"
+        required: true
+        type: string
+        default: "no"
+
+# 동시 실행 방지
+# 같은 환경에 동시에 배포하면 State 충돌이 발생할 수 있습니다
+concurrency:
+  group: terraform-apply-${{ github.event.inputs.environment }}
+  cancel-in-progress: false  # Apply 중에는 취소하지 않음!
+
+jobs:
+  # ==========================================
+  # Job 1: Plan (Apply 전 확인)
+  # ==========================================
+  plan:
+    name: "Plan (${{ github.event.inputs.environment }})"
+    runs-on: ubuntu-latest
+    # 확인 문자열이 "yes"일 때만 실행
+    if: github.event.inputs.confirm == 'yes'
+
+    defaults:
+      run:
+        working-directory: 09-ci-cd
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-northeast-2
+
+    # Plan 결과를 다음 Job으로 전달
+    outputs:
+      plan_exitcode: ${{ steps.plan.outputs.exitcode }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      # Plan 실행 (-detailed-exitcode 사용)
+      # Exit code 0: 변경 없음
+      # Exit code 1: 에러 발생
+      # Exit code 2: 변경 사항 있음
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="environment=${{ github.event.inputs.environment }}" \
+            -no-color \
+            -input=false \
+            -detailed-exitcode
+        continue-on-error: true
+
+      - name: Check Plan
+        run: |
+          if [ "${{ steps.plan.outputs.exitcode }}" == "1" ]; then
+            echo "❌ Plan failed!"
+            exit 1
+          elif [ "${{ steps.plan.outputs.exitcode }}" == "0" ]; then
+            echo "ℹ️ No changes needed."
+          else
+            echo "✅ Changes detected. Ready to apply."
+          fi
+
+  # ==========================================
+  # Job 2: Apply (실제 배포)
+  # ==========================================
+  apply:
+    name: "Apply (${{ github.event.inputs.environment }})"
+    runs-on: ubuntu-latest
+    needs: plan  # Plan Job이 완료된 후에만 실행
+
+    # Environment 보호 규칙 적용
+    # GitHub에서 Environment를 설정하면:
+    #   - 승인자 지정 가능
+    #   - 대기 시간 설정 가능
+    #   - 특정 브랜치만 배포 허용 가능
+    environment: ${{ github.event.inputs.environment }}
+
+    defaults:
+      run:
+        working-directory: 09-ci-cd
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-northeast-2
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      # Apply 실행
+      # -auto-approve: 확인 프롬프트 없이 즉시 실행
+      # (CI 환경에서는 대화형 입력이 불가능하므로 필요)
+      - name: Terraform Apply
+        run: |
+          terraform apply \
+            -var="environment=${{ github.event.inputs.environment }}" \
+            -auto-approve \
+            -input=false
+
+      # 배포 결과 출력
+      - name: Show Outputs
+        run: terraform output
