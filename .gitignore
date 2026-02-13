@@ -197,6 +197,10 @@ plan.out
 # 프로젝트별 커스텀 제외 파일
 # 필요시 여기에 추가
 
+# 학습용 환경별 tfvars는 Git에 포함 (민감 정보 없음)
+# 03-multi-environment의 환경별 변수 파일
+!03-multi-environment/environments/*/terraform.tfvars
+
 # =======================================
 # IMPORTANT: Always Include
 # =======================================
