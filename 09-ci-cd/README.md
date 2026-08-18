@@ -72,6 +72,7 @@ Git Push / PR 생성
 ├── README.md
 ├── .github/
 │   └── workflows/
+│       ├── link-check.yml            # 문서 링크 검사 (자격증명 불필요)
 │       ├── validate.yml              # fmt + validate 검증
 │       ├── terraform-plan.yml        # PR 시 Plan 실행
 │       ├── terraform-apply.yml       # 승인 후 Apply
@@ -81,7 +82,8 @@ Git Push / PR 생성
 │   └── plan.sh                       # 로컬 Plan 스크립트
 ├── docs/
 │   ├── ci-cd-setup.md                # CI/CD 초기 설정 가이드
-│   └── github-actions-guide.md       # GitHub Actions 상세 가이드
+│   ├── github-actions-guide.md       # GitHub Actions 상세 가이드
+│   └── link-check-guide.md           # 링크 체커 실습 가이드
 ├── main.tf                           # 예시 인프라 (VPC, EC2)
 ├── variables.tf
 ├── outputs.tf
@@ -129,6 +131,29 @@ git push origin 09-ci-cd
 
 - GitHub Actions: Public 리포지토리 무료 / Private 2,000분/월 무료
 - AWS 리소스: 워크플로우로 배포한 리소스에 따라 과금
+
+## 🟢 여기부터 시작하세요 — link-check.yml
+
+Terraform 워크플로우 4개는 실행하려면 AWS 자격증명이 필요하고,
+잘못 돌리면 실제 리소스가 생성되어 과금됩니다.
+GitHub Actions를 처음 배운다면 **`link-check.yml`부터 읽으세요.**
+
+| 항목 | Terraform 워크플로우 | link-check.yml |
+|------|---------------------|----------------|
+| 자격증명 | AWS Access Key 필요 | 불필요 |
+| 실패 시 영향 | 리소스가 잘못 생성될 수 있음 | 없음 |
+| 실행 시간 | 수 분 | 20초 내외 |
+| 비용 | AWS 과금 발생 가능 | 무료 |
+
+트리거 4종(`push`, `pull_request`, `schedule`, `workflow_dispatch`),
+Job과 Step의 관계, `GITHUB_TOKEN` 사용법을 한 파일에서 모두 볼 수 있습니다.
+
+실습 방법과 일부러 실패시켜 보는 방법은 [docs/link-check-guide.md](docs/link-check-guide.md)에 있습니다.
+
+> 이 워크플로우는 **실제로 이 저장소에서 동작 중**입니다.
+> main 브랜치 루트에 같은 워크플로우가 있고, 11개 브랜치 전체의 문서 링크를
+> 매주 검사합니다 —
+> [main의 link-check.yml](https://github.com/solzip/terraform-aws-study/blob/main/.github/workflows/link-check.yml)
 
 ## ⚠️ 워크플로우가 자동 실행되지 않는 이유
 
