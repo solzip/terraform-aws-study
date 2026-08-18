@@ -1,5 +1,9 @@
 # 07-security-advanced - AWS 보안 심화
 
+> 🔴 **난이도**: 고급 | **학습 시간**: 6시간
+
+[← 메인 README](https://github.com/solzip/terraform-aws-study) | [← 이전: 06-security-basic](https://github.com/solzip/terraform-aws-study/tree/06-security-basic) | [다음: 08-monitoring →](https://github.com/solzip/terraform-aws-study/tree/08-monitoring)
+
 ## 학습 목표
 
 06-security-basic에서 배운 IAM, KMS, Secrets Manager 기초 위에
@@ -149,3 +153,7 @@ terraform apply
 # 학습 완료 후 반드시 정리!
 terraform destroy
 ```
+
+---
+
+[← 메인 README](https://github.com/solzip/terraform-aws-study) | [← 이전: 06-security-basic](https://github.com/solzip/terraform-aws-study/tree/06-security-basic) | [다음: 08-monitoring →](https://github.com/solzip/terraform-aws-study/tree/08-monitoring)

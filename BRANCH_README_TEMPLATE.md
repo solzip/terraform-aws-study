@@ -1,8 +1,21 @@
+<!--
+==========================================================
+  브랜치 README 작성 템플릿
+==========================================================
+  이 파일은 그대로 읽는 문서가 아니라 **복사해서 쓰는 템플릿**입니다.
+  아래 내용을 `<브랜치명>/README.md`로 복사한 뒤 값을 교체하세요.
+
+  - 제목/난이도/학습 시간을 해당 브랜치에 맞게 수정
+  - `docs/...` 상대 링크는 브랜치 디렉토리 기준이므로 복사 후 정상 동작합니다
+  - 이전/다음 브랜치 링크는 절대 URL을 사용합니다 (상대 경로는 GitHub에서 깨집니다)
+==========================================================
+-->
+
 # 01-basic - Terraform 기초
 
 > 🟢 **난이도**: 초급 | **학습 시간**: 2-3시간
 
-[← 메인 README로 돌아가기](../../)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study)
 
 ## 📚 이 브랜치에서 배우는 것
 
@@ -399,7 +412,7 @@ git checkout 02-basic-localstack
 
 **다음 학습 주제**: LocalStack을 사용한 로컬 개발 환경 구축
 
-[← 메인 README로 돌아가기](../../) | [다음: 02-basic-localstack →](../../tree/02-basic-localstack)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [다음: 02-basic-localstack →](https://github.com/solzip/terraform-aws-study/tree/02-basic-localstack)
 
 ---
 
