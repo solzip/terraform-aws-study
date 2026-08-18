@@ -2,7 +2,7 @@
 
 > 🟡 **난이도**: 중급 | **학습 시간**: 4시간
 
-[← 메인 README로 돌아가기](../../) | [← 이전: 03-multi-environment](../../tree/03-multi-environment)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [← 이전: 03-multi-environment](https://github.com/solzip/terraform-aws-study/tree/03-multi-environment)
 
 ## 📚 학습 목표
 
@@ -69,6 +69,9 @@
 ### 1단계: 브랜치 체크아웃
 ```bash
 git checkout 04-modules-basic
+
+# 실습 코드는 브랜치와 같은 이름의 디렉토리 안에 있습니다
+cd 04-modules-basic
 ```
 
 ### 2단계: 모듈 구조 확인
@@ -244,7 +247,7 @@ git checkout 05-remote-state
 - DynamoDB State Locking
 - 팀 협업을 위한 State 공유
 
-[← 이전: 03-multi-environment](../../tree/03-multi-environment) | [다음: 05-remote-state →](../../tree/05-remote-state)
+[← 이전: 03-multi-environment](https://github.com/solzip/terraform-aws-study/tree/03-multi-environment) | [다음: 05-remote-state →](https://github.com/solzip/terraform-aws-study/tree/05-remote-state)
 
 ---
 
