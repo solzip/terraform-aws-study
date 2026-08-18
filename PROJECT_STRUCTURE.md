@@ -121,7 +121,7 @@ terraform init
 ├── docs/
 │   ├── 01-setup.md
 │   ├── 02-execution.md
-│   └── 03-.cleanup.md            # ⚠️ 실제 파일명에 점이 하나 더 있습니다
+│   └── 03-cleanup.md             # 정리 가이드
 ├── main.tf                        # VPC, IGW, Subnet, Route Table, SG, EC2
 ├── variables.tf                   # 기본 변수
 ├── outputs.tf                     # Public IP, VPC ID, web_url 등 21개
@@ -136,7 +136,7 @@ terraform init
 ├── docs/
 │   ├── 01-localstack-setup.md
 │   ├── 02-docker-guide.md
-│   └── 03-trobleshooting.md      # ⚠️ 실제 파일명 오타 (troubleshooting)
+│   └── 03-troubleshooting.md     # 트러블슈팅
 ├── docker-compose.yml             # 🐳 LocalStack 설정
 ├── .env.example                   # 환경변수 예시
 ├── localstack/
@@ -273,6 +273,8 @@ terraform init
 │   │   │   └── dashboards.tf
 │   │   ├── sns/
 │   │   │   └── notifications.tf
+│   │   ├── logs/
+│   │   │   └── log-groups.tf      # 로그 그룹 4종
 │   │   └── cloudtrail/
 │   │       └── audit-trail.tf
 ├── monitoring.tf                  # 진입점 (main.tf 아님)
@@ -280,10 +282,6 @@ terraform init
     ├── alerting-guide.md
     └── log-analysis.md
 ```
-
-> ⚠️ `monitoring.tf`는 `./modules/monitoring/logs` 모듈을 호출하지만
-> 해당 디렉토리가 아직 커밋되어 있지 않아 `terraform init`이 실패합니다.
-> README의 "알려진 이슈" 항목을 참고하세요.
 
 ### 09-ci-cd
 ```
@@ -412,8 +410,8 @@ docs/
 
 | 브랜치 | docs/ 파일 |
 |--------|-----------|
-| 01-basic | `01-setup.md`, `02-execution.md`, `03-.cleanup.md` |
-| 02-basic-localstack | `01-localstack-setup.md`, `02-docker-guide.md`, `03-trobleshooting.md` |
+| 01-basic | `01-setup.md`, `02-execution.md`, `03-cleanup.md` |
+| 02-basic-localstack | `01-localstack-setup.md`, `02-docker-guide.md`, `03-troubleshooting.md` |
 | 03-multi-environment | `01-multi-environment-guide.md` |
 | 04-modules-basic | `01-module-design-guide.md` |
 | 05-remote-state | `state-migration.md` |

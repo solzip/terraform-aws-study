@@ -218,5 +218,9 @@ plan.out
 # 1. git filter-branch 또는 BFG Repo-Cleaner 사용
 # 2. 노출된 자격증명은 즉시 재발급
 # 3. GitHub Secret Scanning 활성화 권장
+
+# =======================================
+# Local Tooling
+# =======================================
 # bkit (로컬 개발 도구 상태 파일)
 .bkit/
