@@ -122,7 +122,7 @@ terraform init && terraform plan && terraform apply
 ```
 
 **생성 리소스**: VPC, Public Subnet, IGW, Route Table, Security Group, EC2 (t2.micro)
-**문서**: `docs/01-setup.md`, `docs/02-execution.md`, `docs/03-.cleanup.md`
+**문서**: `docs/01-setup.md`, `docs/02-execution.md`, `docs/03-cleanup.md`
 
 ---
 
@@ -324,9 +324,11 @@ git checkout 09-ci-cd && cd 09-ci-cd
 
 ```bash
 git checkout 10-production-ready && cd 10-production-ready
-terraform init -backend-config=environments/dev/backend.tf
+terraform init
 terraform apply -var-file=environments/dev/terraform.tfvars
 ```
+
+`environments/<환경>/`에는 변수 파일과 backend 설정만 있고 리소스 정의는 루트 `main.tf` 하나뿐입니다. 반드시 브랜치 루트에서 실행하고 환경은 `-var-file`로 지정하세요. backend 블록은 기본적으로 주석 처리되어 있어 세 환경이 로컬 State 하나를 공유합니다.
 
 ```
 main.tf (오케스트레이터)
@@ -408,9 +410,18 @@ Git에 절대 커밋하지 말 것:
 | 05-remote-state | `backend.hcl`의 `bucket` 값이 `CHANGE-ME` 플레이스홀더입니다. `backend-setup` 실행 후 실제 버킷 이름으로 교체하세요. |
 | 08-monitoring | 로그 그룹은 생성되지만 CloudWatch Agent가 없어 실제 로그는 수집되지 않습니다 (의도된 학습 범위). |
 
-### 해결된 이슈
+위 두 항목은 각 브랜치 README에 대처 방법이 함께 적혀 있습니다.
 
-- **08-monitoring `terraform init` 실패** (2026-08-18 해결) — `modules/monitoring/logs`가 커밋되지 않아 발생했습니다. 원인은 `.gitignore`의 `logs/` 패턴이 하위 경로의 모든 `logs/` 디렉토리를 제외한 것이었습니다. 패턴을 `/logs/`로 좁히고 모듈을 추가했습니다.
+### 해결된 이슈 (2026-08-18)
+
+- **08-monitoring `terraform init` 실패** — `modules/monitoring/logs`가 커밋되지 않아 발생했습니다. 원인은 `.gitignore`의 `logs/` 패턴이 하위 경로의 모든 `logs/` 디렉토리를 제외한 것이었습니다. 패턴을 `/logs/`로 좁히고 모듈을 추가했습니다.
+- **02-basic-localstack `terraform validate` 실패** — Provider `endpoints` 블록에 존재하지 않는 `ebs` 키가 있었습니다. EBS는 EC2 API의 일부라 별도 엔드포인트가 없습니다.
+- **03, 10의 잘못된 배포 안내** — `cd environments/dev` 후 `terraform apply`를 안내했지만 그 디렉토리에는 리소스 정의가 없어 아무것도 생성되지 않았습니다. 루트에서 `-var-file`을 쓰도록 수정했습니다.
+- **브랜치 README의 깨진 이전/다음 링크** — `../../tree/<브랜치>` 상대 경로는 GitHub에서 동작하지 않아 절대 URL로 교체했습니다. 링크가 없던 07~10에도 추가했습니다.
+
+### 검증 상태
+
+10개 브랜치 전부 Terraform v1.9.8 기준으로 `terraform init -backend=false`, `terraform validate`, `terraform fmt -check`를 통과합니다.
 
 ## 참고 자료
 
