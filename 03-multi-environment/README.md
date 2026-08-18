@@ -2,7 +2,7 @@
 
 > 🟡 **난이도**: 중급 | **학습 시간**: 3시간
 
-[← 메인 README로 돌아가기](../../) | [← 이전: 02-basic-localstack](../../tree/02-basic-localstack)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [← 이전: 02-basic-localstack](https://github.com/solzip/terraform-aws-study/tree/02-basic-localstack)
 
 ## 📚 학습 목표
 
@@ -48,24 +48,35 @@ environments/
 
 ## 🚀 실습 가이드
 
-### 방법 1: 디렉토리 기반 (권장)
+### 방법 1: 변수 파일 기반 (권장)
+
+`environments/<환경>/` 디렉토리에는 **변수 파일과 backend 설정만** 들어 있습니다.
+리소스 정의는 브랜치 루트의 `main.tf` 하나뿐이므로,
+`cd environments/dev` 후에 `terraform apply`를 실행하면 아무 리소스도 만들어지지 않습니다.
+
+항상 **브랜치 루트에서 실행하고, 환경은 `-var-file`로 지정**합니다.
 
 ```bash
-# Dev 환경 배포
-cd environments/dev
-terraform init
-terraform apply
+git checkout 03-multi-environment
+cd 03-multi-environment
 
-# Staging 환경 배포
-cd ../staging
 terraform init
-terraform apply
 
-# Prod 환경 배포
-cd ../prod
-terraform init
-terraform apply
+# Dev 환경
+terraform plan  -var-file=environments/dev/terraform.tfvars
+terraform apply -var-file=environments/dev/terraform.tfvars
+
+# Staging 환경
+terraform apply -var-file=environments/staging/terraform.tfvars
+
+# Prod 환경
+terraform apply -var-file=environments/prod/terraform.tfvars
 ```
+
+> ⚠️ 위 명령은 **하나의 State 파일을 공유**합니다.
+> 그대로 실행하면 dev로 만든 리소스가 staging 설정으로 교체됩니다.
+> 환경을 동시에 유지하려면 아래 방법 2(Workspace)를 사용하세요.
+> 실무에서는 05-remote-state에서 배우는 환경별 S3 backend로 State를 분리합니다.
 
 ### 방법 2: Workspace 기반
 
@@ -321,7 +332,7 @@ git checkout 04-modules-basic
 - 모듈 입출력 정의
 - 모듈 버전 관리
 
-[← 이전: 02-basic-localstack](../../tree/02-basic-localstack) | [다음: 04-modules-basic →](../../tree/04-modules-basic)
+[← 이전: 02-basic-localstack](https://github.com/solzip/terraform-aws-study/tree/02-basic-localstack) | [다음: 04-modules-basic →](https://github.com/solzip/terraform-aws-study/tree/04-modules-basic)
 
 ---
 
