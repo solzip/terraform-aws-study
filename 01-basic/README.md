@@ -2,6 +2,8 @@
 
 > 🟢 **난이도**: 초급 | **학습 시간**: 2-3시간
 
+[← 메인 README](https://github.com/solzip/terraform-aws-study) | [다음: 02-basic-localstack →](https://github.com/solzip/terraform-aws-study/tree/02-basic-localstack)
+
 ## 📚 이 브랜치에서 배우는 것
 
 이 브랜치는 Terraform의 가장 기본적인 개념과 AWS 인프라 구축 방법을 학습합니다.
@@ -83,9 +85,10 @@
 ├── variables.tf                   # 입력 변수 선언
 ├── outputs.tf                     # 출력 값 정의
 ├── versions.tf                    # Terraform/Provider 버전
-├── terraform.tfvars.example       # 변수 값 예시
-└── .gitignore                     # Git 제외 파일
+└── terraform.tfvars.example       # 변수 값 예시
 ```
+
+> `.gitignore`는 이 디렉토리가 아니라 저장소 루트에 하나만 있으며 전체에 적용됩니다.
 
 ## 🚀 실습 시작하기
 
@@ -97,6 +100,9 @@
 ### Step 1: 브랜치 체크아웃
 ```bash
 git checkout 01-basic
+
+# 실습 코드는 브랜치와 같은 이름의 디렉토리 안에 있습니다
+cd 01-basic
 ```
 
 ### Step 2: 변수 파일 설정
@@ -942,7 +948,7 @@ git checkout 02-basic-localstack
 - 🐳 Docker로 AWS 서비스 시뮬레이션
 - ⚡ 빠른 테스트 및 개발 환경 구축
 
-[← 메인 README로 돌아가기](../../) | [다음: 02-basic-localstack →](../../tree/02-basic-localstack)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [다음: 02-basic-localstack →](https://github.com/solzip/terraform-aws-study/tree/02-basic-localstack)
 
 ---
 

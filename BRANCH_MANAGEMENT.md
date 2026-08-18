@@ -97,10 +97,14 @@ git push -u origin 02-basic-localstack
 
 ### 기본 형식
 ```
-<type>: <subject>
+<type>(<scope>): <subject>
 
 <body>
 ```
+
+- `scope`는 선택이며, 이 저장소에서는 **브랜치 이름**을 씁니다.
+- 실제 커밋 예시: `feat(09-ci-cd): add CI/CD pipeline with GitHub Actions`
+- 루트 문서처럼 특정 브랜치에 속하지 않는 변경은 scope 없이: `docs: update README.md`
 
 ### Type 종류
 - `feat`: 새로운 기능 추가
@@ -149,18 +153,17 @@ Learning Objectives:
 
 #### 03-multi-environment
 ```bash
-git commit -m "feat: Implement multi-environment infrastructure
+git commit -m "feat(03-multi-environment): Implement multi-environment infrastructure
 
 - Separate dev/staging/prod configurations
 - Add environment-specific tfvars files
-- Implement Terraform workspace strategy
 - Create environment directory structure
 - Add backend configuration per environment
+- Extract shared resources into a web-app module
 
 Learning Objectives:
 - Understand environment separation strategies
-- Learn workspace management
-- Master variable file organization
+- Master variable file organization with -var-file
 - Implement environment-specific resource sizing"
 ```
 
@@ -318,7 +321,7 @@ git worktree remove ../terraform-02-localstack
 
 > 🟢/🟡/🔴 **난이도**: 초급/중급/고급 | **학습 시간**: X시간
 
-[← 메인 README로 돌아가기](../../)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study)
 
 ## 📚 이 브랜치에서 배우는 것
 ...
@@ -417,5 +420,6 @@ git commit -m "Resolve merge conflict"
 
 ---
 
-**작성일**: 2025-02-02  
-**버전**: 1.0.0
+**작성일**: 2025-02-02
+**마지막 업데이트**: 2026-08-18
+**버전**: 1.1.0
