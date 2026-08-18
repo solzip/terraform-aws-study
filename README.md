@@ -425,7 +425,7 @@ Git에 절대 커밋하지 말 것:
 
 ## 참고 자료
 
-- [Terraform 공식 문서](https://www.terraform.io/docs)
+- [Terraform 공식 문서](https://developer.hashicorp.com/terraform/docs)
 - [AWS Provider 문서](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 - [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
 - [GitHub Actions 문서](https://docs.github.com/en/actions)
