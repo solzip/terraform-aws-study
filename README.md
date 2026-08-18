@@ -423,6 +423,12 @@ Git에 절대 커밋하지 말 것:
 
 10개 브랜치 전부 Terraform v1.9.8 기준으로 `terraform init -backend=false`, `terraform validate`, `terraform fmt -check`를 통과합니다.
 
+문서 링크는 GitHub Actions가 자동으로 검사합니다 ([.github/workflows/link-check.yml](.github/workflows/link-check.yml)).
+
+- main에 문서 변경이 Push되거나 PR이 올라오면 해당 브랜치를 검사
+- 매주 월요일 11개 브랜치 전체를 검사 (외부 사이트 이전으로 죽는 링크 탐지)
+- 검사 제외 규칙은 [.lycheeignore](.lycheeignore) — 로컬 실습 주소와 문서 예시용 플레이스홀더
+
 ## 참고 자료
 
 - [Terraform 공식 문서](https://developer.hashicorp.com/terraform/docs)
