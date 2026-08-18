@@ -273,6 +273,8 @@ terraform init
 │   │   │   └── dashboards.tf
 │   │   ├── sns/
 │   │   │   └── notifications.tf
+│   │   ├── logs/
+│   │   │   └── log-groups.tf      # 로그 그룹 4종
 │   │   └── cloudtrail/
 │   │       └── audit-trail.tf
 ├── monitoring.tf                  # 진입점 (main.tf 아님)
@@ -280,10 +282,6 @@ terraform init
     ├── alerting-guide.md
     └── log-analysis.md
 ```
-
-> ⚠️ `monitoring.tf`는 `./modules/monitoring/logs` 모듈을 호출하지만
-> 해당 디렉토리가 아직 커밋되어 있지 않아 `terraform init`이 실패합니다.
-> README의 "알려진 이슈" 항목을 참고하세요.
 
 ### 09-ci-cd
 ```

@@ -280,10 +280,11 @@ terraform init && terraform apply
 modules/monitoring/
 ├── cloudwatch/   Metrics, Alarms, Dashboard
 ├── sns/          알림 토픽 (monitoring + critical)
+├── logs/         Log Groups (application, system, access, error)
 └── cloudtrail/   API 감사 로깅, Root 로그인 탐지
 ```
 
-> ⚠️ 현재 `monitoring.tf`가 `./modules/monitoring/logs` 모듈을 호출하지만 해당 모듈이 아직 커밋되어 있지 않아 `terraform init`이 실패합니다. [알려진 이슈](#알려진-이슈) 참고.
+> 로그 그룹은 생성되지만 EC2에 CloudWatch Agent가 설치되어 있지 않아 실제 로그는 쌓이지 않습니다. 브랜치 README에 테스트 이벤트를 넣어보는 방법이 있습니다.
 
 ---
 
@@ -403,9 +404,13 @@ Git에 절대 커밋하지 말 것:
 
 | 브랜치 | 내용 |
 |--------|------|
-| 08-monitoring | `monitoring.tf`가 `./modules/monitoring/logs`를 호출하지만 해당 모듈 디렉토리가 커밋되어 있지 않습니다. Log Group 모듈(application/system/access/error)을 추가해야 `terraform init`이 통과합니다. |
 | 09-ci-cd | 워크플로우가 `09-ci-cd/.github/workflows/`에 있어 GitHub이 자동 실행하지 않습니다. 실제 구동하려면 저장소 루트로 옮겨야 합니다. |
 | 05-remote-state | `backend.hcl`의 `bucket` 값이 `CHANGE-ME` 플레이스홀더입니다. `backend-setup` 실행 후 실제 버킷 이름으로 교체하세요. |
+| 08-monitoring | 로그 그룹은 생성되지만 CloudWatch Agent가 없어 실제 로그는 수집되지 않습니다 (의도된 학습 범위). |
+
+### 해결된 이슈
+
+- **08-monitoring `terraform init` 실패** (2026-08-18 해결) — `modules/monitoring/logs`가 커밋되지 않아 발생했습니다. 원인은 `.gitignore`의 `logs/` 패턴이 하위 경로의 모든 `logs/` 디렉토리를 제외한 것이었습니다. 패턴을 `/logs/`로 좁히고 모듈을 추가했습니다.
 
 ## 참고 자료
 
