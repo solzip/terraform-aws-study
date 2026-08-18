@@ -127,8 +127,12 @@ $RECYCLE.BIN/
 # Logs
 # =======================================
 *.log
-logs/
 *.log.*
+
+# 런타임 로그 출력 디렉토리만 제외합니다.
+# 앞에 /를 붙이지 않으면 하위 경로의 모든 logs/ 디렉토리가 제외되어
+# Terraform 모듈(modules/monitoring/logs/)까지 커밋에서 누락됩니다.
+/logs/
 
 # =======================================
 # Temporary Files
@@ -214,3 +218,9 @@ plan.out
 # 1. git filter-branch 또는 BFG Repo-Cleaner 사용
 # 2. 노출된 자격증명은 즉시 재발급
 # 3. GitHub Secret Scanning 활성화 권장
+
+# =======================================
+# Local Tooling
+# =======================================
+# bkit (로컬 개발 도구 상태 파일)
+.bkit/
