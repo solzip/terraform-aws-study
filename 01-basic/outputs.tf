@@ -152,7 +152,7 @@ output "aws_region" {
 # 배포 완료 메시지
 output "deployment_summary" {
   description = "배포 요약 정보"
-  value = <<-EOT
+  value       = <<-EOT
 
   ╔════════════════════════════════════════════════════════════════════╗
   ║           Terraform 인프라 배포 완료! 🎉                          ║

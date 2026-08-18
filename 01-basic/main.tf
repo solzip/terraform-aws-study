@@ -9,29 +9,29 @@
 # Data Source를 사용하여 동적으로 최신 AMI ID 조회
 # 매번 수동으로 AMI ID를 찾을 필요가 없음
 data "aws_ami" "amazon_linux_2023" {
-  most_recent = true  # 가장 최신 AMI 선택
-  owners      = ["amazon"]  # Amazon 공식 AMI만 검색
+  most_recent = true       # 가장 최신 AMI 선택
+  owners      = ["amazon"] # Amazon 공식 AMI만 검색
 
   # AMI 필터링 조건
   filter {
     name   = "name"
-    values = ["al2023-ami-*-x86_64"]  # Amazon Linux 2023, x86_64 아키텍처
+    values = ["al2023-ami-*-x86_64"] # Amazon Linux 2023, x86_64 아키텍처
   }
 
   filter {
     name   = "virtualization-type"
-    values = ["hvm"]  # Hardware Virtual Machine
+    values = ["hvm"] # Hardware Virtual Machine
   }
 
   filter {
     name   = "root-device-type"
-    values = ["ebs"]  # EBS 기반 루트 디바이스
+    values = ["ebs"] # EBS 기반 루트 디바이스
   }
 }
 
 # 현재 사용 가능한 가용 영역 목록 조회
 data "aws_availability_zones" "available" {
-  state = "available"  # 사용 가능한 AZ만 조회
+  state = "available" # 사용 가능한 AZ만 조회
 }
 
 # ==========================================
@@ -40,7 +40,7 @@ data "aws_availability_zones" "available" {
 
 # VPC 생성 - AWS에서 논리적으로 격리된 네트워크 공간
 resource "aws_vpc" "main" {
-  cidr_block = var.vpc_cidr  # IP 주소 범위 (예: 10.0.0.0/16 = 65,536개 IP)
+  cidr_block = var.vpc_cidr # IP 주소 범위 (예: 10.0.0.0/16 = 65,536개 IP)
 
   # DNS 호스트네임 활성화 - EC2 인스턴스가 DNS 이름을 가질 수 있음
   enable_dns_hostnames = true
@@ -64,7 +64,7 @@ resource "aws_vpc" "main" {
 # Internet Gateway 생성
 # VPC가 인터넷과 통신할 수 있도록 해주는 게이트웨이
 resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id  # 위에서 생성한 VPC에 연결
+  vpc_id = aws_vpc.main.id # 위에서 생성한 VPC에 연결
 
   tags = merge(
     var.additional_tags,
@@ -81,8 +81,8 @@ resource "aws_internet_gateway" "main" {
 # Public Subnet 생성
 # 인터넷에 직접 접근 가능한 서브넷
 resource "aws_subnet" "public" {
-  vpc_id = aws_vpc.main.id
-  cidr_block = var.public_subnet_cidr  # Subnet의 IP 주소 범위
+  vpc_id     = aws_vpc.main.id
+  cidr_block = var.public_subnet_cidr # Subnet의 IP 주소 범위
 
   # 가용 영역 지정 - 변수로 지정되지 않으면 첫 번째 가용 영역 사용
   availability_zone = var.availability_zone != null ? var.availability_zone : data.aws_availability_zones.available.names[0]
@@ -94,7 +94,7 @@ resource "aws_subnet" "public" {
     var.additional_tags,
     {
       Name = "${var.project_name}-${var.environment}-public-subnet"
-      Type = "Public"  # 서브넷 타입 표시
+      Type = "Public" # 서브넷 타입 표시
     }
   )
 }
@@ -110,7 +110,7 @@ resource "aws_route_table" "public" {
 
   # 인터넷으로 향하는 트래픽(0.0.0.0/0)은 Internet Gateway로 라우팅
   route {
-    cidr_block = "0.0.0.0/0"  # 모든 IP (인터넷)
+    cidr_block = "0.0.0.0/0" # 모든 IP (인터넷)
     gateway_id = aws_internet_gateway.main.id
   }
 
@@ -144,10 +144,10 @@ resource "aws_security_group" "web" {
   # 인바운드 규칙 - HTTP 트래픽 허용
   ingress {
     description = "HTTP from Internet"
-    from_port   = 80  # 시작 포트
-    to_port     = 80  # 종료 포트
-    protocol    = "tcp"  # 프로토콜
-    cidr_blocks = var.allowed_http_cidr_blocks  # 허용할 IP 범위
+    from_port   = 80                           # 시작 포트
+    to_port     = 80                           # 종료 포트
+    protocol    = "tcp"                        # 프로토콜
+    cidr_blocks = var.allowed_http_cidr_blocks # 허용할 IP 범위
   }
 
   # 인바운드 규칙 - SSH 트래픽 허용
@@ -156,7 +156,7 @@ resource "aws_security_group" "web" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.allowed_ssh_cidr_blocks  # 보안을 위해 특정 IP만 허용 권장
+    cidr_blocks = var.allowed_ssh_cidr_blocks # 보안을 위해 특정 IP만 허용 권장
   }
 
   # 아웃바운드 규칙 - 모든 트래픽 허용
@@ -165,7 +165,7 @@ resource "aws_security_group" "web" {
     description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # -1은 모든 프로토콜을 의미
+    protocol    = "-1" # -1은 모든 프로토콜을 의미
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -193,18 +193,18 @@ resource "aws_instance" "web" {
   # AMI ID - 변수로 지정되었으면 사용, 아니면 최신 Amazon Linux 2023 사용
   ami = var.ami_id != null ? var.ami_id : data.aws_ami.amazon_linux_2023.id
 
-  instance_type = var.instance_type  # 인스턴스 크기 (t2.micro 등)
-  subnet_id     = aws_subnet.public.id  # 배포할 서브넷
+  instance_type = var.instance_type    # 인스턴스 크기 (t2.micro 등)
+  subnet_id     = aws_subnet.public.id # 배포할 서브넷
 
   # Security Group 연결
   vpc_security_group_ids = [aws_security_group.web.id]
 
   # 루트 볼륨 설정
   root_block_device {
-    volume_size           = var.root_volume_size  # 볼륨 크기 (GB)
-    volume_type           = "gp3"  # General Purpose SSD (gp3가 gp2보다 성능/가격 우수)
-    delete_on_termination = true   # 인스턴스 삭제 시 볼륨도 함께 삭제
-    encrypted             = true   # 볼륨 암호화 (보안 강화)
+    volume_size           = var.root_volume_size # 볼륨 크기 (GB)
+    volume_type           = "gp3"                # General Purpose SSD (gp3가 gp2보다 성능/가격 우수)
+    delete_on_termination = true                 # 인스턴스 삭제 시 볼륨도 함께 삭제
+    encrypted             = true                 # 볼륨 암호화 (보안 강화)
 
     tags = merge(
       var.additional_tags,
@@ -223,7 +223,7 @@ resource "aws_instance" "web" {
   # 인스턴스 메타데이터 옵션 (보안 강화)
   metadata_options {
     http_endpoint               = "enabled"
-    http_tokens                 = "required"  # IMDSv2 사용 강제 (보안 권장사항)
+    http_tokens                 = "required" # IMDSv2 사용 강제 (보안 권장사항)
     http_put_response_hop_limit = 1
     instance_metadata_tags      = "enabled"
   }
@@ -324,7 +324,7 @@ resource "aws_instance" "web" {
   # 인스턴스가 완전히 초기화될 때까지 대기
   # User Data 스크립트가 완료될 때까지 시간이 걸릴 수 있음
   depends_on = [
-    aws_internet_gateway.main  # IGW가 먼저 생성되어야 패키지 다운로드 가능
+    aws_internet_gateway.main # IGW가 먼저 생성되어야 패키지 다운로드 가능
   ]
 
   tags = merge(

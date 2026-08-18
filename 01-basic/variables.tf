@@ -83,7 +83,7 @@ variable "public_subnet_cidr" {
 variable "availability_zone" {
   description = "Public Subnet을 생성할 가용 영역 (예: ap-northeast-2a)"
   type        = string
-  default     = null  # null이면 리전의 첫 번째 AZ 자동 선택
+  default     = null # null이면 리전의 첫 번째 AZ 자동 선택
 
   # AZ 형식 검증 (값이 있을 때만)
   validation {
@@ -121,7 +121,7 @@ variable "ami_id" {
 variable "root_volume_size" {
   description = "EC2 인스턴스 루트 볼륨 크기 (GB)"
   type        = number
-  default     = 8  # 프리티어는 최대 30GB까지 무료
+  default     = 8 # 프리티어는 최대 30GB까지 무료
 
   # 볼륨 크기 검증
   validation {
@@ -138,7 +138,7 @@ variable "root_volume_size" {
 variable "allowed_ssh_cidr_blocks" {
   description = "SSH 접근을 허용할 IP 주소 범위 (보안을 위해 특정 IP만 허용 권장)"
   type        = list(string)
-  default     = ["0.0.0.0/0"]  # 기본값은 모든 IP 허용 (프로덕션에서는 권장하지 않음)
+  default     = ["0.0.0.0/0"] # 기본값은 모든 IP 허용 (프로덕션에서는 권장하지 않음)
 
   # CIDR 목록 검증
   validation {
@@ -151,7 +151,7 @@ variable "allowed_ssh_cidr_blocks" {
 variable "allowed_http_cidr_blocks" {
   description = "HTTP 접근을 허용할 IP 주소 범위"
   type        = list(string)
-  default     = ["0.0.0.0/0"]  # 웹 서버이므로 모든 IP 허용
+  default     = ["0.0.0.0/0"] # 웹 서버이므로 모든 IP 허용
 
   # CIDR 목록 검증
   validation {
