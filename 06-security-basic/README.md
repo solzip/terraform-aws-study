@@ -2,7 +2,7 @@
 
 > 🟡 **난이도**: 중급 | **학습 시간**: 4시간
 
-[← 메인 README로 돌아가기](../../) | [← 이전: 05-remote-state](../../tree/05-remote-state)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [← 이전: 05-remote-state](https://github.com/solzip/terraform-aws-study/tree/05-remote-state)
 
 ## 📚 학습 목표
 
@@ -70,6 +70,8 @@
 
 ```bash
 git checkout 06-security-basic
+cd 06-security-basic   # 실습 코드는 브랜치와 같은 이름의 디렉토리 안에 있습니다
+
 terraform init
 terraform plan      # 생성될 보안 리소스 확인
 terraform apply
@@ -77,6 +79,10 @@ terraform apply
 # 리소스 정리
 terraform destroy
 ```
+
+> 이 브랜치의 진입점은 `main.tf`가 아니라 **`security.tf`** 입니다.
+> Terraform은 디렉토리 안의 모든 `.tf` 파일을 함께 읽으므로 파일명은 자유이며,
+> 여기서는 파일 이름만 봐도 역할을 알 수 있도록 `security.tf`로 두었습니다.
 
 ## 💡 핵심 학습 포인트
 
@@ -141,7 +147,7 @@ terraform destroy
 git checkout 07-security-advanced
 ```
 
-[← 이전: 05-remote-state](../../tree/05-remote-state) | [다음: 07-security-advanced →](../../tree/07-security-advanced)
+[← 이전: 05-remote-state](https://github.com/solzip/terraform-aws-study/tree/05-remote-state) | [다음: 07-security-advanced →](https://github.com/solzip/terraform-aws-study/tree/07-security-advanced)
 
 ---
 
