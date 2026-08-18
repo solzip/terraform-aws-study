@@ -1,0 +1,148 @@
+# ==========================================
+# link-check.yml - 문서 링크 검사 워크플로우
+# ==========================================
+#
+# 이 워크플로우의 역할:
+#   저장소의 모든 .md 문서에서 링크를 뽑아
+#   실제로 열리는지 확인합니다.
+#
+# 왜 필요한가:
+#   1. 상대 경로 오타 — ../../tree/08-monitoring 같은 링크는 GitHub에서 404
+#   2. 파일 이름 변경 — docs/03-cleanup.md로 링크했는데 파일은 03-.cleanup.md
+#   3. 외부 사이트 이전 — 내 코드를 안 건드려도 상대방이 문서를 옮기면 링크가 죽음
+#
+#   1, 2번은 PR에서 잡고, 3번은 주간 예약 실행으로 잡습니다.
+#
+# 사용 도구: lychee (Rust로 만든 링크 체커)
+#   - 외부 URL은 실제 HTTP 요청을 보냄
+#   - 상대 경로는 파일이 존재하는지 확인
+#   - 제외 규칙은 저장소 루트의 .lycheeignore에서 읽음
+
+name: "Link Check"
+
+# ==========================================
+# 트리거 조건
+# ==========================================
+on:
+  # main에 Push될 때 (문서가 바뀐 경우에만)
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".lycheeignore"
+      - ".github/workflows/link-check.yml"
+
+  # main으로 PR이 올라올 때
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".lycheeignore"
+
+  # 매주 월요일 09:00 KST (UTC 00:00)
+  # 외부 사이트가 문서를 옮기면 내 저장소는 그대로여도 링크가 죽습니다.
+  # 그래서 코드 변경과 무관하게 주기적으로 확인합니다.
+  schedule:
+    - cron: "0 0 * * 1"
+
+  # 수동 실행 (Actions 탭 > Run workflow)
+  workflow_dispatch:
+
+# ==========================================
+# 권한
+# ==========================================
+# 기본 권한을 읽기로 낮춥니다 (최소 권한 원칙).
+# GITHUB_TOKEN은 github.com 링크를 확인할 때 API 호출 제한을 늘리는 용도로만 씁니다.
+permissions:
+  contents: read
+
+jobs:
+  # ==========================================
+  # Job 1: 현재 브랜치 문서 검사
+  # ==========================================
+  #
+  # Push/PR로 올라온 그 시점의 문서를 검사합니다.
+  # 오타를 머지 전에 잡는 것이 목적이라 빠르게 끝나야 합니다.
+  current:
+    name: "Check current ref"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # lychee-action이 lychee 설치부터 실행까지 처리합니다.
+      #
+      # 주요 옵션:
+      #   --no-progress : CI 로그에 진행률 애니메이션을 남기지 않음
+      #   --max-retries : 일시적인 네트워크 오류에 대비한 재시도
+      #   --timeout     : 응답이 없는 사이트를 기다리는 최대 초
+      #   './**/*.md'   : 검사 대상 (하위 디렉토리 포함 모든 마크다운)
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --max-retries 3
+            --timeout 20
+            './**/*.md'
+          # 깨진 링크가 하나라도 있으면 이 Job을 실패시킵니다.
+          fail: true
+          # Actions 요약 화면에 결과 표를 출력합니다.
+          jobSummary: true
+        env:
+          # github.com 링크가 많아 익명 요청만으로는 API 제한에 걸립니다.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ==========================================
+  # Job 2: 전체 브랜치 검사
+  # ==========================================
+  #
+  # 이 저장소는 학습 단계마다 브랜치가 분리되어 있고,
+  # 브랜치마다 README와 docs/가 따로 있습니다.
+  # main만 검사하면 나머지 10개 브랜치의 링크는 확인되지 않습니다.
+  #
+  # 다만 매 PR마다 11개 브랜치를 도는 것은 낭비이므로
+  # 예약 실행과 수동 실행에서만 동작시킵니다.
+  all-branches:
+    name: "Check ${{ matrix.branch }}"
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    strategy:
+      # 한 브랜치가 실패해도 나머지를 계속 검사합니다.
+      # (기본값 true면 하나 실패 시 나머지가 취소되어 전체 현황을 못 봅니다)
+      fail-fast: false
+      matrix:
+        branch:
+          - main
+          - 01-basic
+          - 02-basic-localstack
+          - 03-multi-environment
+          - 04-modules-basic
+          - 05-remote-state
+          - 06-security-basic
+          - 07-security-advanced
+          - 08-monitoring
+          - 09-ci-cd
+          - 10-production-ready
+
+    steps:
+      # ref로 검사할 브랜치를 지정해 체크아웃합니다.
+      - name: Checkout ${{ matrix.branch }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --max-retries 3
+            --timeout 20
+            './**/*.md'
+          fail: true
+          jobSummary: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
