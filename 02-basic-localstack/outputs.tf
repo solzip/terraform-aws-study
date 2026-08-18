@@ -28,7 +28,7 @@ output "localstack_endpoint" {
 
 output "deployment_info" {
   description = "배포 정보"
-  value = <<-EOT
+  value       = <<-EOT
 
   ╔════════════════════════════════════════════════════════╗
   ║     LocalStack 환경에서 Terraform 배포 완료! 🎉       ║

@@ -19,20 +19,23 @@ provider "aws" {
   # 모든 AWS 서비스가 localhost:4566으로 통합됨
   endpoints {
     # Compute
-    ec2            = "http://localhost:4566"
+    ec2 = "http://localhost:4566"
 
     # Storage
-    s3             = "http://s3.localhost.localstack.cloud:4566"  # S3는 특별한 엔드포인트 사용
-    ebs            = "http://localhost:4566"
+    s3 = "http://s3.localhost.localstack.cloud:4566" # S3는 특별한 엔드포인트 사용
+
+    # 참고: EBS는 별도 엔드포인트 키가 없습니다.
+    # EBS 볼륨(aws_ebs_volume 등)은 EC2 API의 일부라서 위의 ec2 엔드포인트를 그대로 사용합니다.
+    # endpoints 블록에 ebs = ... 를 넣으면 "Unsupported argument" 에러가 발생합니다.
 
     # Database
-    dynamodb       = "http://localhost:4566"
-    rds            = "http://localhost:4566"
+    dynamodb = "http://localhost:4566"
+    rds      = "http://localhost:4566"
 
     # Networking
-    elb            = "http://localhost:4566"
-    elbv2          = "http://localhost:4566"
-    route53        = "http://localhost:4566"
+    elb     = "http://localhost:4566"
+    elbv2   = "http://localhost:4566"
+    route53 = "http://localhost:4566"
 
     # Security & Identity
     iam            = "http://localhost:4566"
@@ -46,19 +49,19 @@ provider "aws" {
     logs           = "http://localhost:4566"
 
     # Application Integration
-    sns            = "http://localhost:4566"
-    sqs            = "http://localhost:4566"
+    sns = "http://localhost:4566"
+    sqs = "http://localhost:4566"
 
     # Lambda
-    lambda         = "http://localhost:4566"
+    lambda = "http://localhost:4566"
 
     # Analytics
-    kinesis        = "http://localhost:4566"
-    firehose       = "http://localhost:4566"
+    kinesis  = "http://localhost:4566"
+    firehose = "http://localhost:4566"
 
     # API Gateway
-    apigateway     = "http://localhost:4566"
-    apigatewayv2   = "http://localhost:4566"
+    apigateway   = "http://localhost:4566"
+    apigatewayv2 = "http://localhost:4566"
   }
 
   # LocalStack에서는 기본 태그가 제대로 작동하지 않을 수 있음

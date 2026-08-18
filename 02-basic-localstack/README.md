@@ -2,7 +2,7 @@
 
 > 🟢 **난이도**: 초급 | **학습 시간**: 2시간 | **비용**: 💰 무료!
 
-[← 메인 README로 돌아가기](../../) | [← 이전: 01-basic](../../tree/01-basic)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [← 이전: 01-basic](https://github.com/solzip/terraform-aws-study/tree/01-basic)
 
 ## 📚 이 브랜치에서 배우는 것
 
@@ -70,7 +70,6 @@ AWS 비용 걱정 없이 로컬 환경에서 Terraform을 실습합니다.
 ├── providers-localstack.tf     # LocalStack용 Provider (기본 활성화)
 ├── providers-aws.tf            # AWS 실제 환경용 (참고용) 
 ├── terraform.tfvars.example
-├── .gitignore
 ├── .env.example                # 환경 변수 예시
 └── docs/
     ├── 01-localstack-setup.md
@@ -88,6 +87,10 @@ AWS 비용 걱정 없이 로컬 환경에서 Terraform을 실습합니다.
 ### Step 1: LocalStack 실행
 
 ```bash
+# 브랜치 전환 후 실습 디렉토리로 이동
+git checkout 02-basic-localstack
+cd 02-basic-localstack
+
 # Docker Compose로 LocalStack 시작
 docker-compose up -d
 
@@ -492,7 +495,7 @@ git checkout 03-multi-environment
 - 환경별 변수 관리
 - Workspace 활용
 
-[← 이전: 01-basic](../../tree/01-basic) | [다음: 03-multi-environment →](../../tree/03-multi-environment)
+[← 이전: 01-basic](https://github.com/solzip/terraform-aws-study/tree/01-basic) | [다음: 03-multi-environment →](https://github.com/solzip/terraform-aws-study/tree/03-multi-environment)
 
 ---
 
