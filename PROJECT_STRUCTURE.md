@@ -5,12 +5,41 @@
 ## 📁 Main 브랜치 구조
 
 ```
-terraform-aws-basic/               # 프로젝트 루트
+terraform-aws-study/               # 프로젝트 루트
 ├── README.md                      # 📘 전체 학습 로드맵 (메인 가이드)
+├── QUICKSTART.md                  # ⚡ 5분 빠른 시작 가이드
 ├── BRANCH_MANAGEMENT.md           # 📗 Git 브랜치 관리 가이드
 ├── PROJECT_STRUCTURE.md           # 📕 현재 문서 (프로젝트 구조)
 ├── LEARNING_PROGRESS.md           # 📊 개인 학습 진행률
+├── BRANCH_README_TEMPLATE.md      # 📄 브랜치 README 작성 템플릿
 └── .gitignore                     # 🚫 Git 제외 파일 목록
+```
+
+### ⚠️ 학습 브랜치의 실제 배치
+
+위 문서 6개는 **모든 학습 브랜치에도 그대로 존재**합니다.
+실습용 Terraform 코드는 **브랜치와 같은 이름의 하위 디렉토리** 안에 들어 있습니다.
+
+```
+01-basic 브랜치를 체크아웃했을 때
+├── README.md                      # ← main과 동일한 공통 문서들
+├── QUICKSTART.md
+├── BRANCH_MANAGEMENT.md
+├── PROJECT_STRUCTURE.md
+├── LEARNING_PROGRESS.md
+├── BRANCH_README_TEMPLATE.md
+└── 01-basic/                      # ← 실습 코드는 여기
+    ├── README.md                  # 해당 단계 전용 가이드
+    ├── docs/
+    └── *.tf
+```
+
+따라서 브랜치 전환 후에는 반드시 하위 디렉토리로 이동해야 합니다.
+
+```bash
+git checkout 01-basic
+cd 01-basic          # ← 이 단계 없이는 terraform init이 동작하지 않습니다
+terraform init
 ```
 
 ### 파일별 설명
@@ -62,7 +91,7 @@ terraform-aws-basic/               # 프로젝트 루트
 
 ## 📁 학습 브랜치 기본 구조
 
-각 학습 브랜치는 다음과 같은 기본 구조를 가집니다:
+각 학습 브랜치의 하위 디렉토리(`<브랜치명>/`)는 다음과 같은 기본 구조를 가집니다:
 
 ```
 브랜치명/
@@ -70,17 +99,16 @@ terraform-aws-basic/               # 프로젝트 루트
 ├── docs/                          # 📚 상세 문서 디렉토리
 │   ├── 01-setup.md               # 초기 설정
 │   ├── 02-execution.md           # 실행 가이드
-│   ├── 03-cleanup.md             # 정리 가이드
-│   └── architecture.png          # 아키텍처 다이어그램
+│   └── 03-cleanup.md             # 정리 가이드
 ├── main.tf                        # 🏗️ 주요 리소스 정의
 ├── variables.tf                   # 🔧 입력 변수 선언
 ├── outputs.tf                     # 📤 출력 값 정의
 ├── versions.tf                    # 🔖 Terraform/Provider 버전
-├── terraform.tfvars.example       # 📋 변수 값 예시
-├── .gitignore                     # 🚫 Git 제외 파일
-└── learning-notes/                # 📝 개인 학습 노트 (선택)
-    └── notes.md
+└── terraform.tfvars.example       # 📋 변수 값 예시
 ```
+
+> `.gitignore`는 브랜치 디렉토리가 아니라 **저장소 루트에 하나만** 있으며 전체에 적용됩니다.
+> 진입점 파일명은 브랜치마다 다를 수 있습니다 — 06은 `security.tf`, 08은 `monitoring.tf`입니다.
 
 ---
 
@@ -93,11 +121,11 @@ terraform-aws-basic/               # 프로젝트 루트
 ├── docs/
 │   ├── 01-setup.md
 │   ├── 02-execution.md
-│   └── 03-cleanup.md
-├── main.tf                        # VPC, EC2, Security Group
+│   └── 03-.cleanup.md            # ⚠️ 실제 파일명에 점이 하나 더 있습니다
+├── main.tf                        # VPC, IGW, Subnet, Route Table, SG, EC2
 ├── variables.tf                   # 기본 변수
-├── outputs.tf                     # Public IP, VPC ID 등
-├── versions.tf                    # AWS Provider ~> 5.0
+├── outputs.tf                     # Public IP, VPC ID, web_url 등 21개
+├── versions.tf                    # Terraform >= 1.0, AWS Provider
 └── terraform.tfvars.example
 ```
 
@@ -106,15 +134,20 @@ terraform-aws-basic/               # 프로젝트 루트
 02-basic-localstack/
 ├── README.md
 ├── docs/
-│   └── localstack-setup.md
+│   ├── 01-localstack-setup.md
+│   ├── 02-docker-guide.md
+│   └── 03-trobleshooting.md      # ⚠️ 실제 파일명 오타 (troubleshooting)
 ├── docker-compose.yml             # 🐳 LocalStack 설정
+├── .env.example                   # 환경변수 예시
 ├── localstack/
-│   ├── init-scripts/              # 초기화 스크립트
+│   ├── init-scripts/init.sh       # 초기화 스크립트
 │   └── README.md
 ├── main.tf                        # LocalStack용 리소스
 ├── providers-localstack.tf        # LocalStack endpoints
 ├── providers-aws.tf               # AWS (참고용)
-└── Makefile                       # 편의 명령어
+├── switch-to-localstack.sh        # 🔄 Provider 전환 스크립트
+├── switch-to-aws.sh
+└── makefile                       # 편의 명령어 (소문자 파일명)
 ```
 
 ### 03-multi-environment
@@ -131,9 +164,17 @@ terraform-aws-basic/               # 프로젝트 루트
 │   └── prod/
 │       ├── terraform.tfvars
 │       └── backend.tf
-├── main.tf                        # 공통 리소스 정의
+├── main.tf                        # 공통 리소스 정의 + web-app 모듈 호출
 ├── variables.tf                   # 환경 변수
-└── modules/                       # (간단한 모듈)
+├── outputs.tf
+├── versions.tf
+├── docs/
+│   └── 01-multi-environment-guide.md
+└── modules/
+    └── web-app/                   # 환경 공통 인프라 모듈
+        ├── main.tf
+        ├── variables.tf
+        └── outputs.tf
 ```
 
 ### 04-modules-basic
@@ -232,15 +273,17 @@ terraform-aws-basic/               # 프로젝트 루트
 │   │   │   └── dashboards.tf
 │   │   ├── sns/
 │   │   │   └── notifications.tf
-│   │   ├── logs/
-│   │   │   └── log-groups.tf
 │   │   └── cloudtrail/
 │   │       └── audit-trail.tf
-├── monitoring.tf
+├── monitoring.tf                  # 진입점 (main.tf 아님)
 └── docs/
     ├── alerting-guide.md
     └── log-analysis.md
 ```
+
+> ⚠️ `monitoring.tf`는 `./modules/monitoring/logs` 모듈을 호출하지만
+> 해당 디렉토리가 아직 커밋되어 있지 않아 `terraform init`이 실패합니다.
+> README의 "알려진 이슈" 항목을 참고하세요.
 
 ### 09-ci-cd
 ```
@@ -264,21 +307,44 @@ terraform-aws-basic/               # 프로젝트 루트
 ```
 10-production-ready/
 ├── README.md
+├── main.tf                        # 🏗️ 오케스트레이터 (vpc/security/ec2 모듈 조합)
+├── variables.tf
+├── outputs.tf
+├── versions.tf
+├── environments/                  # 🌍 환경별 설정
+│   ├── dev/                      # t2.micro x1, 기본 모니터링
+│   │   ├── terraform.tfvars
+│   │   └── backend.tf
+│   ├── staging/                  # t2.small x2, 상세 모니터링
+│   │   ├── terraform.tfvars
+│   │   └── backend.tf
+│   └── prod/                     # t3.medium x3, 상세 모니터링
+│       ├── terraform.tfvars
+│       └── backend.tf
 ├── modules/
-│   ├── alb/                       # ⚖️ Application Load Balancer
-│   ├── asg/                       # 📈 Auto Scaling Group
-│   ├── rds/                       # 🗃️ RDS Multi-AZ
-│   ├── elasticache/               # 💾 ElastiCache
-│   ├── route53/                   # 🌐 DNS
-│   └── cloudfront/                # 🚀 CDN
-├── production.tf
-├── alb.tf
-├── asg.tf
-├── rds.tf
+│   ├── vpc/                      # VPC, Subnet(2 AZ), IGW, Route Table
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── security/                 # Security Group, IAM Role/Instance Profile
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── ec2/                      # EC2 (AZ 분산, EBS 암호화)
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── user_data.sh.tpl      # User Data 템플릿
 └── docs/
-    ├── architecture.md
-    ├── scaling-strategy.md
-    └── disaster-recovery.md
+    ├── module-design.md
+    └── production-checklist.md
+```
+
+실행 시에는 환경별 backend와 변수 파일을 함께 지정합니다.
+
+```bash
+terraform init -backend-config=environments/dev/backend.tf
+terraform apply -var-file=environments/dev/terraform.tfvars
 ```
 
 ---
@@ -333,36 +399,50 @@ terraform-aws-basic/               # 프로젝트 루트
 
 ## 📚 docs/ 디렉토리 구조
 
-### 표준 문서
+### 네이밍 컨벤션 (권장)
 ```
 docs/
 ├── 01-setup.md                    # 환경 설정
 ├── 02-execution.md                # 실행 가이드
 ├── 03-cleanup.md                  # 리소스 정리
-├── architecture.png               # 아키텍처 다이어그램
-├── troubleshooting.md             # 문제 해결
-└── faq.md                         # 자주 묻는 질문
+└── [주제]-guide.md                # 주제별 심화 문서
 ```
 
-### 브랜치별 추가 문서
-- **02-localstack**: `localstack-setup.md`
-- **05-remote-state**: `state-migration.md`
-- **06-security-basic**: `security-best-practices.md`
-- **07-security-advanced**: `compliance.md`
-- **08-monitoring**: `alerting-guide.md`, `log-analysis.md`
-- **09-ci-cd**: `github-actions-guide.md`
-- **10-production**: `scaling-strategy.md`, `disaster-recovery.md`
+### 브랜치별 실제 문서 목록
+
+| 브랜치 | docs/ 파일 |
+|--------|-----------|
+| 01-basic | `01-setup.md`, `02-execution.md`, `03-.cleanup.md` |
+| 02-basic-localstack | `01-localstack-setup.md`, `02-docker-guide.md`, `03-trobleshooting.md` |
+| 03-multi-environment | `01-multi-environment-guide.md` |
+| 04-modules-basic | `01-module-design-guide.md` |
+| 05-remote-state | `state-migration.md` |
+| 06-security-basic | `security-best-practices.md` |
+| 07-security-advanced | `security-checklist.md`, `compliance.md` |
+| 08-monitoring | `alerting-guide.md`, `log-analysis.md` |
+| 09-ci-cd | `ci-cd-setup.md`, `github-actions-guide.md` |
+| 10-production-ready | `module-design.md`, `production-checklist.md` |
+
+> 04-modules-basic과 05-remote-state는 각 모듈/디렉토리 안에도 README를 두고 있습니다.
+> (`modules/vpc/README.md`, `backend-setup/README.md` 등)
 
 ---
 
 ## 🔧 설정 파일
 
 ### .gitignore
+
+저장소 루트의 `.gitignore` 주요 항목(발췌)입니다. 실제 파일은 200줄 이상으로 더 상세합니다.
+
 ```gitignore
 # Terraform
 *.tfstate
 *.tfstate.*
-*.tfvars
+*.tfstate.backup
+terraform.tfstate.lock.info
+terraform.tfvars                   # ← *.tfvars 전체가 아니라 이 파일명만 제외
+*.auto.tfvars
+*.tfvars.backup
 .terraform/
 .terraform.lock.hcl
 override.tf
@@ -388,25 +468,22 @@ secrets/
 crash.log
 ```
 
-### Makefile (일부 브랜치)
-```makefile
-.PHONY: init plan apply destroy clean
+### makefile (02-basic-localstack 전용)
 
-init:
-	terraform init
+`02-basic-localstack`에만 있으며, LocalStack 컨테이너 제어와 Terraform 명령을 함께 묶어둔 편의 도구입니다.
+사용 가능한 명령은 `make help`로 확인할 수 있습니다.
 
-plan:
-	terraform plan
+| 분류 | 주요 타겟 |
+|------|----------|
+| LocalStack 제어 | `start`, `stop`, `restart`, `logs`, `health`, `ps`, `shell` |
+| Terraform | `init`, `validate`, `fmt`, `plan`, `apply`, `destroy`, `output` |
+| 통합 | `all`(start→init→apply), `test`, `clean`(destroy+stop), `reset` |
+| 확인 | `check`, `list-vpcs`, `list-instances`, `aws-config` |
 
-apply:
-	terraform apply -auto-approve
-
-destroy:
-	terraform destroy -auto-approve
-
-clean:
-	rm -rf .terraform
-	rm -f .terraform.lock.hcl
+```bash
+make help     # 전체 명령어 목록
+make all      # LocalStack 시작 → init → apply 한 번에
+make clean    # 리소스 삭제 + LocalStack 중지
 ```
 
 ---
@@ -494,5 +571,6 @@ variable "environment" {
 
 ---
 
-**작성일**: 2025-02-02  
-**버전**: 1.0.0
+**작성일**: 2025-02-02
+**마지막 업데이트**: 2026-08-18 (실제 브랜치 내용과 대조하여 수정)
+**버전**: 1.1.0

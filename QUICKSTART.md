@@ -4,9 +4,12 @@
 
 ## 📋 필요한 것
 
-- ✅ AWS 계정
+- ✅ AWS 계정 (프리티어 가능)
 - ✅ 터미널 (Terminal/CMD)
 - ✅ 텍스트 에디터
+
+> 💡 AWS 계정을 아직 만들지 않았다면 `01-basic` 대신 **`02-basic-localstack`**부터 시작하세요.
+> Docker만 있으면 과금 없이 동일한 Terraform 문법을 실습할 수 있습니다.
 
 ---
 
@@ -16,12 +19,18 @@
 
 ```bash
 # 저장소 클론
-git clone <repository-url>
-cd terraform-aws-basic
+git clone https://github.com/solzip/terraform-aws-study.git
+cd terraform-aws-study
 
 # 첫 번째 브랜치로 이동
 git checkout 01-basic
+
+# ⚠️ 실습 코드는 브랜치와 같은 이름의 디렉토리 안에 있습니다
+cd 01-basic
 ```
+
+> **꼭 기억하세요**: 모든 브랜치는 `<브랜치명>/` 하위 디렉토리에 `.tf` 파일을 두고 있습니다.
+> 저장소 루트에서 `terraform init`을 실행하면 아무것도 찾지 못합니다.
 
 ### 2단계: 필수 도구 설치 (2분)
 
@@ -66,6 +75,9 @@ aws configure
 ### 3단계: 첫 인프라 배포 (2분)
 
 ```bash
+# 현재 위치가 terraform-aws-study/01-basic 인지 확인
+pwd
+
 # 변수 파일 생성
 cp terraform.tfvars.example terraform.tfvars
 
@@ -79,8 +91,8 @@ terraform plan
 terraform apply
 # 'yes' 입력
 
-# 웹 브라우저로 접속
-# http://[출력된 Public IP]
+# 접속 주소 확인 후 웹 브라우저로 접속
+terraform output web_url
 ```
 
 **축하합니다! 🎉 첫 번째 인프라를 배포했습니다!**
@@ -111,7 +123,10 @@ terraform apply
 
 2. **다음 브랜치로 이동**
    ```bash
+   # 저장소 루트로 올라온 뒤 브랜치를 전환합니다
+   cd ..
    git checkout 02-basic-localstack
+   cd 02-basic-localstack
    ```
 
 3. **반복**
@@ -313,7 +328,7 @@ terraform apply tfplan
 - 📖 **상세 문서**: [README.md](README.md)
 - 🔧 **브랜치 관리**: [BRANCH_MANAGEMENT.md](BRANCH_MANAGEMENT.md)
 - 📁 **프로젝트 구조**: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
-- 👥 **기여하기**: [CONTRIBUTORS.md](CONTRIBUTORS.md)
+- 📊 **학습 진행률**: [LEARNING_PROGRESS.md](LEARNING_PROGRESS.md)
 
 ---
 
@@ -321,8 +336,9 @@ terraform apply tfplan
 
 ```bash
 # Let's Go!
-cd terraform-aws-basic
+cd terraform-aws-study
 git checkout 01-basic
+cd 01-basic
 terraform init
 terraform apply
 ```
@@ -331,5 +347,6 @@ terraform apply
 
 ---
 
-**작성일**: 2025-02-02  
+**작성일**: 2025-02-02
+**마지막 업데이트**: 2026-08-18
 **예상 소요 시간**: 5분
