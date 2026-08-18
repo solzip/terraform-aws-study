@@ -1,5 +1,9 @@
 # 08-monitoring - 모니터링 & 로깅
 
+> 🔴 **난이도**: 고급 | **학습 시간**: 5시간
+
+[← 메인 README](https://github.com/solzip/terraform-aws-study) | [← 이전: 07-security-advanced](https://github.com/solzip/terraform-aws-study/tree/07-security-advanced) | [다음: 09-ci-cd →](https://github.com/solzip/terraform-aws-study/tree/09-ci-cd)
+
 ## 학습 목표
 
 AWS 환경의 **상태를 실시간으로 관찰**하고,
@@ -85,7 +89,7 @@ AWS 환경의 **상태를 실시간으로 관찰**하고,
 │       │   ├── variables.tf
 │       │   └── outputs.tf
 │       ├── logs/
-│       │   ├── log-groups.tf              # 로그 그룹 + 필터
+│       │   ├── log-groups.tf              # 로그 그룹 4종 (app/system/access/error)
 │       │   ├── variables.tf
 │       │   └── outputs.tf
 │       └── cloudtrail/
@@ -117,6 +121,46 @@ terraform init
 terraform plan
 terraform apply
 
+# 생성된 로그 그룹 확인
+terraform output log_groups
+
 # 학습 완료 후
 terraform destroy
 ```
+
+## 로그 그룹에 대해 알아둘 점
+
+이 브랜치는 로그 그룹 4종(`application`, `system`, `access`, `error`)을 만듭니다.
+이름 규칙은 CloudTrail 모듈과 동일하게 `/프로젝트/환경/용도` 형식입니다.
+
+```
+/tf-study/dev/application
+/tf-study/dev/system
+/tf-study/dev/access
+/tf-study/dev/error
+```
+
+**단, 로그 그룹은 만들어지지만 실제 로그는 쌓이지 않습니다.**
+EC2에 CloudWatch Agent를 설치하고 IAM 권한을 주어야 인스턴스의 로그 파일이
+CloudWatch로 전송되기 때문입니다. 이 브랜치는 Terraform으로 로그 **수집 기반**을
+구성하는 것까지를 범위로 합니다.
+
+직접 로그를 넣어보고 싶다면 AWS CLI로 테스트 이벤트를 넣을 수 있습니다.
+
+```bash
+LOG_GROUP=$(terraform output -json log_groups | jq -r .application)
+
+aws logs create-log-stream \
+  --log-group-name "$LOG_GROUP" --log-stream-name test-stream
+
+aws logs put-log-events \
+  --log-group-name "$LOG_GROUP" --log-stream-name test-stream \
+  --log-events timestamp=$(date +%s000),message="ERROR test message"
+```
+
+`ERROR` 문자열은 cloudwatch 모듈의 Metric Filter가 잡아내어
+`ApplicationErrorCount` 메트릭으로 집계됩니다.
+
+---
+
+[← 메인 README](https://github.com/solzip/terraform-aws-study) | [← 이전: 07-security-advanced](https://github.com/solzip/terraform-aws-study/tree/07-security-advanced) | [다음: 09-ci-cd →](https://github.com/solzip/terraform-aws-study/tree/09-ci-cd)
