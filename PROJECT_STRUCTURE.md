@@ -121,7 +121,7 @@ terraform init
 ├── docs/
 │   ├── 01-setup.md
 │   ├── 02-execution.md
-│   └── 03-.cleanup.md            # ⚠️ 실제 파일명에 점이 하나 더 있습니다
+│   └── 03-cleanup.md             # 정리 가이드
 ├── main.tf                        # VPC, IGW, Subnet, Route Table, SG, EC2
 ├── variables.tf                   # 기본 변수
 ├── outputs.tf                     # Public IP, VPC ID, web_url 등 21개
@@ -136,7 +136,7 @@ terraform init
 ├── docs/
 │   ├── 01-localstack-setup.md
 │   ├── 02-docker-guide.md
-│   └── 03-trobleshooting.md      # ⚠️ 실제 파일명 오타 (troubleshooting)
+│   └── 03-troubleshooting.md     # 트러블슈팅
 ├── docker-compose.yml             # 🐳 LocalStack 설정
 ├── .env.example                   # 환경변수 예시
 ├── localstack/
@@ -410,8 +410,8 @@ docs/
 
 | 브랜치 | docs/ 파일 |
 |--------|-----------|
-| 01-basic | `01-setup.md`, `02-execution.md`, `03-.cleanup.md` |
-| 02-basic-localstack | `01-localstack-setup.md`, `02-docker-guide.md`, `03-trobleshooting.md` |
+| 01-basic | `01-setup.md`, `02-execution.md`, `03-cleanup.md` |
+| 02-basic-localstack | `01-localstack-setup.md`, `02-docker-guide.md`, `03-troubleshooting.md` |
 | 03-multi-environment | `01-multi-environment-guide.md` |
 | 04-modules-basic | `01-module-design-guide.md` |
 | 05-remote-state | `state-migration.md` |
