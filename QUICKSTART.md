@@ -267,7 +267,7 @@ vim terraform.tfvars  # 값 수정
 ## 🎓 학습 자료
 
 ### 공식 문서
-- [Terraform 공식 문서](https://www.terraform.io/docs)
+- [Terraform 공식 문서](https://developer.hashicorp.com/terraform/docs)
 - [AWS Provider 문서](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 
 ### 커뮤니티
