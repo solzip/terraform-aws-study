@@ -2,7 +2,7 @@
 
 > 🟡 **난이도**: 중급 | **학습 시간**: 3시간
 
-[← 메인 README로 돌아가기](../../) | [← 이전: 04-modules-basic](../../tree/04-modules-basic)
+[← 메인 README로 돌아가기](https://github.com/solzip/terraform-aws-study) | [← 이전: 04-modules-basic](https://github.com/solzip/terraform-aws-study/tree/04-modules-basic)
 
 ## 📚 학습 목표
 
@@ -66,13 +66,31 @@
 ### 1단계: Backend 인프라 생성 (S3 + DynamoDB)
 
 ```bash
+git checkout 05-remote-state
+cd 05-remote-state          # 실습 코드는 브랜치와 같은 이름의 디렉토리 안에 있습니다
+
 cd backend-setup
 terraform init
 terraform apply
 # → S3 버킷과 DynamoDB 테이블이 생성됩니다
+
+# 생성된 이름을 확인해 둡니다
+terraform output
 ```
 
-### 2단계: 원격 Backend로 초기화
+### 2단계: backend.hcl에 실제 이름 반영
+
+`backend.hcl`의 `bucket` 값은 `CHANGE-ME` 플레이스홀더입니다.
+S3 버킷 이름은 전 세계에서 유일해야 하므로 1단계에서 생성된 실제 이름으로 바꿔야 합니다.
+
+```hcl
+# backend.hcl
+bucket = "terraform-study-state-a1b2c3d4"   # ← 1단계 output 값으로 교체
+```
+
+이 단계를 건너뛰면 3단계에서 `NoSuchBucket` 오류가 발생합니다.
+
+### 3단계: 원격 Backend로 초기화
 
 ```bash
 cd ..
@@ -80,7 +98,7 @@ terraform init -backend-config=backend.hcl
 # → State가 S3에 저장되기 시작합니다
 ```
 
-### 3단계: 인프라 배포
+### 4단계: 인프라 배포
 
 ```bash
 terraform plan
@@ -88,7 +106,7 @@ terraform apply
 # → State가 로컬이 아닌 S3에 저장됩니다
 ```
 
-### 4단계: State 잠금 확인
+### 5단계: State 잠금 확인
 
 ```bash
 # 터미널 A에서 apply 실행 중
@@ -99,7 +117,7 @@ terraform apply
 # → DynamoDB가 동시 접근을 차단합니다!
 ```
 
-### 5단계: 리소스 정리
+### 6단계: 리소스 정리
 
 ```bash
 # 인프라 먼저 삭제
@@ -195,7 +213,7 @@ git checkout 06-security-basic
 - Secrets Manager 기초
 - KMS 암호화 기초
 
-[← 이전: 04-modules-basic](../../tree/04-modules-basic) | [다음: 06-security-basic →](../../tree/06-security-basic)
+[← 이전: 04-modules-basic](https://github.com/solzip/terraform-aws-study/tree/04-modules-basic) | [다음: 06-security-basic →](https://github.com/solzip/terraform-aws-study/tree/06-security-basic)
 
 ---
 
