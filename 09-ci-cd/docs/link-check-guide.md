@@ -119,14 +119,135 @@ git push origin 09-ci-cd
 ### 일부러 실패시켜 보기
 
 CI를 배울 때는 성공보다 **실패를 보는 것**이 중요합니다.
-아무 마크다운 파일에 깨진 링크를 넣고 Push해 보세요.
+성공 화면은 아무것도 알려주지 않지만, 실패 화면은 도구가 무엇을 어떻게 판단하는지 보여줍니다.
 
-```markdown
-[없는 파일](docs/does-not-exist.md)
-[없는 사이트](https://this-domain-definitely-does-not-exist-12345.com)
+아래는 이 저장소에서 실제로 해본 기록입니다. 그대로 따라 할 수 있습니다.
+
+#### 1) 깨진 링크가 든 파일을 만들어 PR을 올린다
+
+main을 더럽히지 않도록 테스트 브랜치에서 작업합니다.
+
+```bash
+git checkout main
+git checkout -b test/link-check-demo
 ```
 
-Actions 탭에서 빨간 X와 함께 어느 파일 몇 번째 줄이 문제인지 표시됩니다.
+`LINK_CHECK_DEMO.md`를 만들고 **정상 링크와 깨진 링크를 섞어서** 넣습니다.
+섞어야 "전부 실패"가 아니라 "깨진 것만 골라낸다"는 걸 확인할 수 있습니다.
+
+```markdown
+## 정상 링크 (통과해야 함)
+- [메인 README](README.md)
+- [Terraform 공식 문서](https://developer.hashicorp.com/terraform/docs)
+
+## 없는 파일 (실패해야 함)
+- [없는 문서](docs/this-file-does-not-exist.md)
+
+## 없는 사이트 (실패해야 함)
+- [없는 사이트](https://this-domain-definitely-does-not-exist-987654.com)
+
+## 예전에 실제로 있었던 깨진 패턴 (실패해야 함)
+- [상대경로 오류](../../tree/08-monitoring)
+```
+
+```bash
+git add LINK_CHECK_DEMO.md
+git commit -m "test: 링크 체커 동작 확인"
+git push -u origin test/link-check-demo
+gh pr create --base main --title "test: 링크 체커 동작 확인" --body "머지하지 않음"
+```
+
+#### 2) PR에 뜨는 체크 결과
+
+PR을 올리자마자 `pull_request` 트리거가 걸리고, **6초 만에** 결과가 나왔습니다.
+
+```
+Check current ref           fail       6s
+Check ${{ matrix.branch }}  skipping   0s
+```
+
+두 번째 줄이 `skipping`인 것도 의도한 동작입니다.
+전체 브랜치 검사 Job에는 다음 조건이 걸려 있어서 PR에서는 건너뜁니다.
+
+```yaml
+if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+```
+
+매 PR마다 11개 브랜치를 도는 것은 낭비이기 때문입니다.
+
+#### 3) 실제 실패 로그
+
+Actions 실행 요약에 아래 표가 그대로 출력됩니다.
+
+```
+# Summary
+
+| Status         | Count |
+|----------------|-------|
+| 🔍 Total       | 35    |
+| 🔗 Unique      | 28    |
+| ✅ Successful  | 31    |
+| ⏳ Timeouts    | 0     |
+| 🔀 Redirected  | 0     |
+| 👻 Excluded    | 1     |
+| ❓ Unknown     | 0     |
+| 🚫 Errors      | 3     |
+| ⛔ Unsupported | 0     |
+
+## Errors per input
+
+### Errors in LINK_CHECK_DEMO.md
+
+* [ERROR] <file:///home/runner/work/terraform-aws-study/terraform-aws-study/docs/this-file-does-not-exist.md> (at 13:3) | File not found. Check if file exists and path is correct
+* [ERROR] <file:///home/runner/work/tree/08-monitoring> (at 21:3) | File not found. Check if file exists and path is correct
+* [ERROR] <https://this-domain-definitely-does-not-exist-987654.com/> (at 17:3) | Connection failed. Check network connectivity and firewall settings
+
+##[error]Process completed with exit code 2.
+```
+
+#### 4) 이 로그에서 읽어낼 것
+
+**링크 35개 중 정확히 3개만 실패했습니다.** 정상 링크 2개는 통과했습니다.
+"뭔가 깨졌다"가 아니라 **어느 파일 몇 번째 줄 몇 번째 칸**인지까지 알려줍니다.
+`(at 13:3)`은 13번째 줄 3번째 칸이라는 뜻입니다.
+
+에러 메시지가 두 종류인 것도 눈여겨보세요.
+
+| 메시지 | 의미 |
+|--------|------|
+| `File not found` | 상대 경로 검사 — 그 위치에 파일이 없음 |
+| `Connection failed` | 외부 URL 검사 — 실제로 HTTP 요청을 보냈으나 실패 |
+
+**가장 중요한 한 줄은 이것입니다.**
+
+```
+<file:///home/runner/work/tree/08-monitoring>
+```
+
+문서에 쓴 링크는 `../../tree/08-monitoring`이었는데,
+저장소 디렉토리를 **밖으로 빠져나가** `/home/runner/work/tree/...`로 해석됐습니다.
+저장소 경로는 `/home/runner/work/terraform-aws-study/terraform-aws-study/`이므로
+`../../`가 두 단계를 거슬러 올라가 버린 것입니다.
+
+이 저장소의 브랜치 README들이 실제로 이 패턴을 쓰고 있었고,
+GitHub에서 전부 404였습니다. 사람 눈으로는 그럴듯해 보여 놓치기 쉬운데
+체커는 바로 잡아냅니다.
+
+`👻 Excluded 1`은 `.lycheeignore`가 걸러낸 항목입니다. 제외 규칙도 함께 동작합니다.
+
+#### 5) 정리
+
+확인이 끝나면 머지하지 말고 닫습니다.
+
+```bash
+gh pr close <PR번호> --delete-branch
+```
+
+> 실제 기록:
+> [PR #1](https://github.com/solzip/terraform-aws-study/pull/1) ·
+> [실패한 실행 로그](https://github.com/solzip/terraform-aws-study/actions/runs/32112478232)
+>
+> PR은 닫혔고 브랜치도 삭제됐지만 기록은 남아 있어 지금도 실패 화면을 볼 수 있습니다.
 
 ## 제외 규칙 (.lycheeignore)
 
